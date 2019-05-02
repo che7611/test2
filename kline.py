@@ -88,6 +88,7 @@ class Kline(object):
             ax1.plot(aa.index*Kline['WW']+Kline['WW'],aa['MACD2'],c='y',linewidth=0.5)
 
         ax.grid()
+        ax1.grid()
         ax.autoscale(tight=False)
         ax.autoscale_view()
 
