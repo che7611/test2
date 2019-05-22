@@ -71,21 +71,21 @@ class Kline(object):
             rec = Rectangle((x2, y), Kline['W'], hh, fill=a, color=cc)
             ax.add_patch(rec)
 
-            if Row['MACD']>0:
-                rec= Rectangle((x2, 0), Kline['W'], Row['MACD'], fill=a, color='R')
+            if Row['macd']>0:
+                rec= Rectangle((x2, 0), Kline['W'], Row['macd'], fill=a, color='R')
             else:
-                rec= Rectangle((x2, 0), Kline['W'], Row['MACD'], fill=a, color='C')
+                rec= Rectangle((x2, 0), Kline['W'], Row['macd'], fill=a, color='C')
             ax1.add_patch(rec)
             d+=1
-        if "MA60" in aa.columns:
-            ax.plot(aa.index*Kline['WW']+Kline['WW'],aa['MA60'],c='r')
-        if "MA30" in aa.columns:
-            ax.plot(aa.index*Kline['WW']+Kline['WW'],aa['MA30'],c='b')
+        if "ma60" in aa.columns:
+            ax.plot(aa.index*Kline['WW']+Kline['WW'],aa['ma60'],c='r')
+        if "ma30" in aa.columns:
+            ax.plot(aa.index*Kline['WW']+Kline['WW'],aa['ma30'],c='b')
         ax1.axhline(0,linestyle="--",linewidth=0.5,color='k')
-        if "DIFF" in aa.columns:
-            ax1.plot(aa.index*Kline['WW']+Kline['WW'],aa['MACD1'],c='b',linewidth=0.5)
-        if "DEA" in aa.columns:
-            ax1.plot(aa.index*Kline['WW']+Kline['WW'],aa['MACD2'],c='y',linewidth=0.5)
+        if "diff" in aa.columns:
+            ax1.plot(aa.index*Kline['WW']+Kline['WW'],aa['diff'],c='b',linewidth=0.5)
+        if "dea" in aa.columns:
+            ax1.plot(aa.index*Kline['WW']+Kline['WW'],aa['dea'],c='y',linewidth=0.5)
 
         ax.grid()
         ax1.grid()
