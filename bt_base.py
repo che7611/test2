@@ -112,6 +112,8 @@ class backtesting():
         self._para['macd_no_red']=0
         self._para['macd_no_green']=0
         self._para['macd']['cnt']=1
+        self._para['macd']['std_up']=0
+        self._para['macd']['std_dn']=0
            
 #计算主体部分----------------------------------------------------------------------------------
     def loop_calc(self):
@@ -162,7 +164,12 @@ class backtesting():
             self._para['macd_no_green']+=1
         else:
             macd['cnt']+=1
-
+            
+        if row['std1']>=1.5:
+            macd['std_up']+=1
+        elif row['std1']<=-1.5:
+            macd['std_dn']+=1
+            
         if state>0:
             macd['prod']=self._para['prod']
             macd['date']=self._para['date']
@@ -172,6 +179,7 @@ class backtesting():
             macd['ma60_state_end']=self._para['ma60']['state']
             self._res['macd'].append(macd)
             macd={}
+            macd['std_up'],macd['std_dn']=0,0
             macd['ma60_state']=self._para['ma60']['state']
             macd['ma60_no']=self._para['ma60']['no']
             macd['no']=self._para['macd_no_red'] if state==1 else self._para['macd_no_green']
@@ -330,4 +338,7 @@ class backtesting():
                                             else trade['open']-trade['close']
         trade['prod']=self._para['prod']
         self._res['trade'].append(trade)
+        
 print("OK")
+
+
