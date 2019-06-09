@@ -114,6 +114,12 @@ class backtesting():
         self._para['macd']['cnt']=1
         self._para['macd']['std_up']=0
         self._para['macd']['std_dn']=0
+        self._para['macd']['day_no']=0
+        self._para['macd']['std_up_list']=[]
+        self._para['macd']['std_dn_list']=[]
+        self._para['macd_day_no']=0
+        self.Macd_State='keep'
+        self.Macd_End={}
            
 #计算主体部分----------------------------------------------------------------------------------
     def loop_calc(self):
@@ -164,22 +170,41 @@ class backtesting():
             self._para['macd_no_green']+=1
         else:
             macd['cnt']+=1
-            
-        if row['std1']>=1.5:
-            macd['std_up']+=1
-        elif row['std1']<=-1.5:
-            macd['std_dn']+=1
+            self.Macd_State='keep'
+            self.Macd_End={}
             
         if state>0:
-            macd['prod']=self._para['prod']
-            macd['date']=self._para['date']
             macd['end']=row['close']
             macd['end_idx']=self._para['day_no']
             macd['diff']=macd['end']-macd['begin'] if state==2 else macd['begin']-macd['end']
             macd['ma60_state_end']=self._para['ma60']['state']
+
             self._res['macd'].append(macd)
+            self.Macd_End=macd
+            self.Macd_State=macd['state']
             macd={}
             macd['std_up'],macd['std_dn']=0,0
+            macd['std_up_list']=[]
+            macd['std_dn_list']=[]
+            
+        if row['std1']>=1.5:
+            macd['std_up']+=1
+            std={}
+            std['diff']=row['close']-row['open']
+            std['idx']=self._para['day_no']
+            macd['std_up_list'].append(std)
+        elif row['std1']<=-1.5:
+            macd['std_dn']+=1
+            std={}
+            std['diff']=row['close']-row['open']
+            std['idx']=self._para['day_no']
+            macd['std_dn_list'].append(std)
+            
+        if state>0:
+            macd['prod']=self._para['prod']
+            macd['date']=self._para['date']
+            self._para['macd_day_no']+=1
+            macd['day_no']=self._para['macd_day_no']
             macd['ma60_state']=self._para['ma60']['state']
             macd['ma60_no']=self._para['ma60']['no']
             macd['no']=self._para['macd_no_red'] if state==1 else self._para['macd_no_green']
@@ -339,6 +364,16 @@ class backtesting():
         trade['prod']=self._para['prod']
         self._res['trade'].append(trade)
         
-print("OK")
 
 
+def GetROI(F1):
+    Res={}
+    Res['ALL_Profit'],Res['All_CNT'],Res['All_Mean']=F1['diff'].agg(['sum','count','mean'])
+    Res['Win_Sum'],Res['Win_CNT'],Res['Win_Mean'],Res['Win_Max'],Res['Win_Min']= \
+        F1[F1['diff']>0]['diff'].agg(['sum','count','mean','max','min'])
+    Res['Lose_Sum'],Res['Lose_CNT'],Res['Lose_Mean'],Res['Lose_Max'],Res['Lose_Min']=\
+        F1[F1['diff']<0]['diff'].agg(['sum','count','mean','max','min'])
+    Res['Win/Lose']=Res['Win_Mean']/-Res['Lose_Mean']
+    Res['Win%']=Res['Win_CNT']*100/Res['All_CNT']
+    Res['ROI']=Res['Win_CNT']/Res['Lose_CNT']*Res['Win/Lose']*100.0-100.0
+    return Res
