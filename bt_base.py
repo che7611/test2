@@ -365,15 +365,49 @@ class backtesting():
         self._res['trade'].append(trade)
         
 
+class tools():
+    def GetROI(F1):
+        Res={}
+        Res['ALL_Profit'],Res['All_CNT'],Res['All_Mean']=F1['diff'].agg(['sum','count','mean'])
+        Res['Win_Sum'],Res['Win_CNT'],Res['Win_Mean'],Res['Win_Max'],Res['Win_Min']= \
+            F1[F1['diff']>0]['diff'].agg(['sum','count','mean','max','min'])
+        Res['Lose_Sum'],Res['Lose_CNT'],Res['Lose_Mean'],Res['Lose_Max'],Res['Lose_Min']=\
+            F1[F1['diff']<0]['diff'].agg(['sum','count','mean','max','min'])
+        Res['Win/Lose']=Res['Win_Mean']/-Res['Lose_Mean']
+        Res['Win%']=Res['Win_CNT']*100/Res['All_CNT']
+        Res['ROI']=Res['Win_CNT']/Res['Lose_CNT']*Res['Win/Lose']*100.0-100.0
+        return Res
+        
+    def Get_Drawdown(F1):
+        res=[]
+        rec={}
+        maxDown={}
+        All=[]
+        maxDown['Dn_Day']=0
+        maxDown['Dn_Lose']=0
 
-def GetROI(F1):
-    Res={}
-    Res['ALL_Profit'],Res['All_CNT'],Res['All_Mean']=F1['diff'].agg(['sum','count','mean'])
-    Res['Win_Sum'],Res['Win_CNT'],Res['Win_Mean'],Res['Win_Max'],Res['Win_Min']= \
-        F1[F1['diff']>0]['diff'].agg(['sum','count','mean','max','min'])
-    Res['Lose_Sum'],Res['Lose_CNT'],Res['Lose_Mean'],Res['Lose_Max'],Res['Lose_Min']=\
-        F1[F1['diff']<0]['diff'].agg(['sum','count','mean','max','min'])
-    Res['Win/Lose']=Res['Win_Mean']/-Res['Lose_Mean']
-    Res['Win%']=Res['Win_CNT']*100/Res['All_CNT']
-    Res['ROI']=Res['Win_CNT']/Res['Lose_CNT']*Res['Win/Lose']*100.0-100.0
-    return Res
+        for i,row in F1.iterrows():
+            idx=0
+            if row['diff']>=0:
+                rec={}
+                if len(res)>0:
+                    rec['len']=len(res)
+                    rec['res']=sum(res)
+                    rec['begin']=i
+
+                    if rec['len']>maxDown['Dn_Day']:
+                        maxDown['Dn_Day']=rec['len']
+                        maxDown['Day_Lose']=rec['res']
+                        maxDown['Day_Begin']=row['Date']
+                    if rec['res']<maxDown['Dn_Lose']:
+                        maxDown['Dn_Lose']=rec['res']
+                        maxDown['Lose_Day']=rec['len']
+                        maxDown['Lose_Begin']=row['Date']
+
+                idx=0
+                res=[]
+            else :
+                res.append(row['diff'])
+        return maxDown
+
+
