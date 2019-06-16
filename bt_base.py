@@ -62,7 +62,7 @@ class backtesting():
     def prod_init(self,prod):
         _fields = ['datetime', 'code', 'open', 'high', 'low', 'close', 'vol','trade_date']
         df1=self.hf.get_bars(prod,_fields)
-        df1['macd'],df1['diff'],df1['dea']=tb.MACD(df1.close.values,fastperiod=6,slowperiod=12,signalperiod=9)
+        df1['macd'],df1['diff'],df1['dea']=tb.MACD(df1.close.values,fastperiod=12,slowperiod=26,signalperiod=9)
         df1['ma30']=tb.EMA(df1.close.values,timeperiod=30)
         df1['ma60']=tb.EMA(df1.close.values,timeperiod=60)
         df1['bias']=(df1['close']-df1['ma60'])/df1['ma60']*100
@@ -83,12 +83,14 @@ class backtesting():
                 self.loop_calc()
                 self.trade_main()
                 self._para['day_no']+=1
+            self.day_end()
             self.trade_end()
         else:
             for i,row in df.iterrows():
                 self._para['row']=row
                 self.loop_calc()
                 self._para['day_no']+=1
+            self.day_end()
         
 #交易日开始前准备----------------------------------------------------------------------------------
     def day_init(self):
@@ -121,6 +123,17 @@ class backtesting():
         self.Macd_State='keep'
         self.Macd_End={}
            
+#每天结束部分---------------------------------------------------------------------------------
+    def day_end(self):
+        macd=self._para['macd']
+        row=self._para['row']
+        macd['end']=row['close']
+        macd['end_idx']=self._para['day_no']
+        macd['end_no']=self._para['macd_no_red'] if macd['state']=='red' else self._para['macd_no_green']
+        macd['diff']=macd['end']-macd['begin'] if macd['state']=='red' else macd['begin']-macd['end']
+        macd['ma60_state_end']=self._para['ma60']['state']
+        self._res['macd'].append(macd)
+        
 #计算主体部分----------------------------------------------------------------------------------
     def loop_calc(self):
         self.calc_ma60()
@@ -176,6 +189,7 @@ class backtesting():
         if state>0:
             macd['end']=row['close']
             macd['end_idx']=self._para['day_no']
+            macd['end_no']=self._para['macd_no_red'] if state==2 else self._para['macd_no_green']
             macd['diff']=macd['end']-macd['begin'] if state==2 else macd['begin']-macd['end']
             macd['ma60_state_end']=self._para['ma60']['state']
 
@@ -364,6 +378,7 @@ class backtesting():
         trade['prod']=self._para['prod']
         self._res['trade'].append(trade)
         
+print("OK")
 
 class tools():
     def GetROI(F1):
