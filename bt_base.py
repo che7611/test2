@@ -13,7 +13,7 @@ import talib as tb
 import configparser
 from kline import Kline
 
-class backtesting():
+class BackTesting():
     
 #初始化-----------------------------------------------------------------------
     def __init__(self,hf:HKFuture,index='HSI'):
@@ -32,15 +32,15 @@ class backtesting():
         self._res['trade']=[]
         
 #当前指数全部品种进行测试---------------------------------------------------------------------
-    def prod_all(self):
+    def contract_all(self,isTrade=True):
         self.cls()
         for k in self._DateList.keys():
             # print(k)
-            self.prod_test(k)
+            self.contract(k,isTrade)
             
 #按单月合约进行测试-----------------------------------------------------------------------------
-    def prod_test(self,prod):
-        self.prod_init(prod)
+    def contract(self,prod,isTrade=True):
+        self.contract_init(prod)
         self._para['prod']=prod
         dt1=dt.time(9,15)
         dt2=dt.time(16,30)
@@ -56,10 +56,13 @@ class backtesting():
             self._para['df1']=df[day_only]
             if len(df[day_only])<2:
                 break
-            self.day_loop()
+            if isTrade and self.Test_Trade:
+                self.day_loop_trade()
+            else:
+                self.day_loop()
     
 #单月品种测试前的初如化---------------------------------------------------------------------------
-    def prod_init(self,prod):
+    def contract_init(self,prod):
         _fields = ['datetime', 'code', 'open', 'high', 'low', 'close', 'vol','trade_date']
         df1=self.hf.get_bars(prod,_fields)
         df1['macd'],df1['diff'],df1['dea']=tb.MACD(df1.close.values,fastperiod=12,slowperiod=26,signalperiod=9)
@@ -71,29 +74,33 @@ class backtesting():
         df1['std1']=df1['chg']/df1['std60']
         self._para['df_prod']=df1
 
-#交易日循环部分-----------------------------------------------------------------------------------
+#每个交易日每条记录循环部分(只计算)-----------------------------------------------------------------------------------
     def day_loop(self):
-        self.day_init()
+        self.day_calc_init()
         df=self._para['df1']
         self._para['day_no']=0
-        if self.Test_Trade:
-            self.trade_init()
-            for i,row in df.iterrows():
-                self._para['row']=row
-                self.loop_calc()
-                self.trade_main()
-                self._para['day_no']+=1
-            self.day_end()
-            self.trade_end()
-        else:
-            for i,row in df.iterrows():
-                self._para['row']=row
-                self.loop_calc()
-                self._para['day_no']+=1
-            self.day_end()
-        
+        for i,row in df.iterrows():
+            self._para['row']=row
+            self.day_calc_main()
+            self._para['day_no']+=1
+        self.day_calc_end()
+            
+#交易日每条记录循环部分（包括交易回测）---------------------------------------------------------------------------------
+    def day_loop_trade(self):
+        self.day_calc_init()
+        self.trade_init()
+        df=self._para['df1']
+        self._para['day_no']=0
+        for i,row in df.iterrows():
+            self._para['row']=row
+            self.day_calc_main()
+            self.trade_main()
+            self._para['day_no']+=1
+        self.day_calc_end()
+        self.trade_end()
+
 #交易日开始前准备----------------------------------------------------------------------------------
-    def day_init(self):
+    def day_calc_init(self):
         row1=self._para['df1'].iloc[0]
 
         self._para['ma60']={}
@@ -124,7 +131,7 @@ class backtesting():
         self.Macd_End={}
            
 #每天结束部分---------------------------------------------------------------------------------
-    def day_end(self):
+    def day_calc_end(self):
         macd=self._para['macd']
         row=self._para['row']
         macd['end']=row['close']
@@ -135,7 +142,7 @@ class backtesting():
         self._res['macd'].append(macd)
         
 #计算主体部分----------------------------------------------------------------------------------
-    def loop_calc(self):
+    def day_calc_main(self):
         self.calc_ma60()
         self.calc_macd()
         
@@ -377,8 +384,8 @@ class backtesting():
                                             else trade['open']-trade['close']
         trade['prod']=self._para['prod']
         self._res['trade'].append(trade)
-        
-print("OK")
+ 
+print("OK")       
 
 class tools():
     def GetROI(F1):
@@ -424,5 +431,7 @@ class tools():
             else :
                 res.append(row['diff'])
         return maxDown
+
+
 
 
