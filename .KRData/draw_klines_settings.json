@@ -1,0 +1,14 @@
+{
+    "color": {
+        "ma5": "r",
+        "ma10": "b",
+        "ma30": "g",
+        "ma60": "m",
+        "barUp": "#ff1717",
+        "barDown": "#53c156",
+        "dif": "b",
+        "dea": "m",
+        "longMark": "b",
+        "shortMark": "m"
+    }
+}
