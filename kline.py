@@ -74,11 +74,16 @@ class Kline(object):
                 x1 =(trade[1]+1)*Kline['WW']
                 y1=aa.iloc[trade[1]]['low']-5
                 x2 =(trade[2]+1)*Kline['WW']
-                y2 =aa.iloc[trade[2]]['high']+5
+                if trade[2]-1>=len(aa):
+                    y2 =aa.iloc[trade[2]]['high']+5
+                    y4=aa.iloc[trade[1]]['close']
+                else:
+                    y2 =aa.iloc[-1]['high']+5
+                    y4=aa.iloc[-1]['close']
                 ax.plot(x1,y1,'r^')
                 ax.plot(x2,y2,'gv')
                 y3=aa.iloc[trade[1]]['close']
-                y4=aa.iloc[trade[2]]['close']
+                #y4=aa.iloc[trade[2]]['close']
                 ax.plot([x1,x2],[y3,y4],c='m',ls='--',linewidth=2)
                 txt="Buy Diff:%s" %(y4-y3)
                 ax.text(x2,y2+10,txt,fontsize=14,color='r')
@@ -86,11 +91,16 @@ class Kline(object):
                 x1 =(trade[1]+1)*Kline['WW']
                 y1=aa.iloc[trade[1]]['high']+5
                 x2 =(trade[2]+1)*Kline['WW']
-                y2 =aa.iloc[trade[2]]['low']-5
+                if trade[2]-1>=len(aa):
+                    y2 =aa.iloc[trade[2]]['low']-5
+                    y4=aa.iloc[trade[2]]['close']
+                else:
+                    y2 =aa.iloc[-1]['low']-5
+                    y4=aa.iloc[-1]['close']
+         
                 ax.plot(x1,y1,'gv')
                 ax.plot(x2,y2,'r^')
                 y3=aa.iloc[trade[1]]['close']
-                y4=aa.iloc[trade[2]]['close']
                 ax.plot([x1,x2],[y3,y4],c='g',ls='--',linewidth=2)
                 txt="Sell Diff:%s" %(y3-y4)
                 y2 =aa.iloc[trade[2]]['high']+10
