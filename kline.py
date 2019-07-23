@@ -74,12 +74,12 @@ class Kline(object):
                 x1 =(trade[1]+1)*Kline['WW']
                 y1=aa.iloc[trade[1]]['low']-5
                 x2 =(trade[2]+1)*Kline['WW']
-                if trade[2]-1>=len(aa):
+                if trade[2]-1<=len(aa):
                     y2 =aa.iloc[trade[2]]['high']+5
-                    y4=aa.iloc[trade[1]]['close']
+                    y4= aa.iloc[trade[2]]['close']
                 else:
                     y2 =aa.iloc[-1]['high']+5
-                    y4=aa.iloc[-1]['close']
+                    y4= aa.iloc[-1]['close']
                 ax.plot(x1,y1,'r^')
                 ax.plot(x2,y2,'gv')
                 y3=aa.iloc[trade[1]]['close']
@@ -91,7 +91,7 @@ class Kline(object):
                 x1 =(trade[1]+1)*Kline['WW']
                 y1=aa.iloc[trade[1]]['high']+5
                 x2 =(trade[2]+1)*Kline['WW']
-                if trade[2]-1>=len(aa):
+                if trade[2]-1<=len(aa):
                     y2 =aa.iloc[trade[2]]['low']-5
                     y4=aa.iloc[trade[2]]['close']
                 else:
