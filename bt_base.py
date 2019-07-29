@@ -66,8 +66,8 @@ class BackTesting():
         _fields = ['datetime', 'code', 'open', 'high', 'low', 'close', 'vol','trade_date']
         df1=self.hf.get_bars(prod,_fields)
         df1['macd'],df1['diff'],df1['dea']=tb.MACD(df1.close.values,fastperiod=12,slowperiod=26,signalperiod=9)
-        df1['ma30']=tb.EMA(df1.close.values,timeperiod=30)
-        df1['ma60']=tb.EMA(df1.close.values,timeperiod=60)
+        df1['ma30']=tb.MA(df1.close.values,timeperiod=30)
+        df1['ma60']=tb.MA(df1.close.values,timeperiod=60)
         df1['bias']=(df1['close']-df1['ma60'])/df1['ma60']*100
         df1['chg']=df1['close']-df1['open']
         df1['std60']=tb.STDDEV(df1['chg'].values,timeperiod=60)
@@ -440,8 +440,8 @@ class BT_Calc():
         _fields = ['datetime', 'code', 'open', 'high', 'low', 'close', 'vol','trade_date']
         df1=self.hf.get_bars(prod,_fields)
         df1['macd'],df1['diff'],df1['dea']=tb.MACD(df1.close.values,fastperiod=12,slowperiod=26,signalperiod=9)
-        df1['ma30']=tb.EMA(df1.close.values,timeperiod=30)
-        df1['ma60']=tb.EMA(df1.close.values,timeperiod=60)
+        df1['ma30']=tb.MA(df1.close.values,timeperiod=30)
+        df1['ma60']=tb.MA(df1.close.values,timeperiod=60)
         df1['bias']=(df1['close']-df1['ma60'])/df1['ma60']*100
         df1['chg']=df1['close']-df1['open']
         df1['std60']=tb.STDDEV(df1['chg'].values,timeperiod=60)
